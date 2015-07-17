@@ -1,0 +1,6 @@
+#Jetbrains files
+.idea
+.idea/*
+
+#compiled phython files
+*.pyc
