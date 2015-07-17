@@ -121,11 +121,10 @@ class Electrons():
         self.eeM[:self.n, self.n:] = np.diag(np.sum(self.yM, axis=1)) - self.yM
         return self
 
-    def make_sys(self, **kwargs):
-        """ should make self.sys """
+    def init_sys(self, **kwargs):
         if kwargs.has_key('omega'): self.omega = kwargs['omega']
         if kwargs.has_key('L'): self.L = kwargs['L']
-        assert hasattr(self, 'omega'), 'need to have omega as an input, or object have to have .omega as an attribute'
+        assert hasattr(self, 'omega'), 'need to have omega as an input, or object have to have .omega as an attribute.'
         assert hasattr(self, 'L'), 'need to have attribute "L" in object. You can manually add this.'
         assert hasattr(self, 'eeM'), 'need to run "make_ee" to build the electron system equation \nof motion first.'
 
@@ -149,9 +148,14 @@ class Electrons():
         # the 1e6 is here because we are in V/micron for the potential, and here we
         # are using the electric field.
         # - the minus sign is there because the potential is upside down. X'(x) > 0 when x > 0.
-        self.couple_c = self.k_eg * self.mw_potential_scale_offset * self.mw_lever * 1e6;
+        self.couple_c = self.k_eg * self.mw_potential_scale_offset * self.mw_lever * 1e6
         self.couple_i = lambda i: self.couple_c * - oddPoly(self.xys[i, 0], *self.ps_dU)
 
+    def make_sys(self, **kwargs):
+        """ should make self.sys
+        call init_sys first to setup the couple functions and the couple constantss
+        """
+        assert hasattr(self, 'couple_i'), 'need to run self.init_sys() first to setup the self.couple_i function.'
         self.sys = np.zeros([2 * self.n + 1, 2 * self.n + 1])
         self.sys[1:, 1:] = self.eeM
         self.sys[0, 0] = self.omega ** 2 * self.L
